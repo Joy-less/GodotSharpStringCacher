@@ -6,6 +6,7 @@
     <LangVersion>13</LangVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 	<PackageId>GodotSharpStringCacher.MSBuild</PackageId>
 	<Description>

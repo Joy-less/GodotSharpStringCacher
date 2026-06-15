@@ -6,6 +6,7 @@
 	<Nullable>enable</Nullable>
 	<LangVersion>13</LangVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 
 	<PackageId>GodotSharpStringCacher</PackageId>
 	<Description>
