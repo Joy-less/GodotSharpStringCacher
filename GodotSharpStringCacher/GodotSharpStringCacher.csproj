@@ -6,6 +6,11 @@
 	<Nullable>enable</Nullable>
 	<LangVersion>13</LangVersion>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+	<PackageId>GodotSharpStringCacher</PackageId>
+	<Description>
+		Library to cache Godot Mono/C# StringName and NodePath without changing the source code.
+	</Description>
   </PropertyGroup>
 
   <ItemGroup>

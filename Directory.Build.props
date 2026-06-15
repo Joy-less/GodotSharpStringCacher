@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+	<PackageVersion>1.0.0-alpha</PackageVersion>
+
+	<Authors>Dathus</Authors>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+	<ProjectUrl>https://github.com/Dathuss/GodotSharpStringCacher</ProjectUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>godot</PackageTags>
+  </PropertyGroup>
+</Project>
