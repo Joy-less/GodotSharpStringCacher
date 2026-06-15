@@ -1,0 +1,18 @@
+<Project>
+  <!-- <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)bin/Debug/netstandard2.0/$(MSBuildThisFileName).dll" TaskName="GodotSharpStringCacher.MSBuild.GDStringCacheTask" /> -->
+  <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/$(MSBuildThisFileName).dll" TaskName="GodotSharpStringCacher.MSBuild.GDStringCacheTask" />
+
+  <PropertyGroup>
+    <!-- The Target this task is run after can be customized (eg if you use an obfuscator) -->
+    <GDStringCacheAfterTargets Condition="'$(GDStringCacheAfterTargets)' == ''">Build</GDStringCacheAfterTargets>
+	<!-- The main assembly is cached by default. If, for some reason, you don't want to, you can -->
+	<GDStringCacheMainAssemblyStrings Condition="'$(GDStringCacheMainAssemblyStrings)' == ''">true</GDStringCacheMainAssemblyStrings>
+	<!-- Use short variable names instead of a variable name that looks like the literal string value -->
+	<GDStringUseShortNames Condition="'$(GDStringUseShortNames)' == ''">false</GDStringUseShortNames>
+  </PropertyGroup>
+
+  <Target Name="CacheMainAssemblyStrings" AfterTargets="$(GDStringCacheAfterTargets)">
+    <GDStringCacheTask CacheMainAssemblyStrings="$(GDStringCacheMainAssemblyStrings)" UseShortNames="$(GDStringUseShortNames)" OutputPath="$(OutputPath)" AssemblyName="$(AssemblyName)" />
+  </Target>
+
+</Project>
