@@ -11,8 +11,8 @@ internal class CacheTypesEmitter(Context ctx)
 	public const string STRING_NAME_CACHE_TYPE_NAME = "?_StringNameCache";
 	public const string NODE_PATH_CACHE_TYPE_NAME = "?_NodePathCache";
 
-	readonly FieldSignature StringNameFieldSig = new(ctx.Imported_StringNameType.ToTypeSignature(ctx.Module.RuntimeContext));
-	readonly FieldSignature NodePathFieldSig = new(ctx.Imported_NodePathType.ToTypeSignature(ctx.Module.RuntimeContext));
+	readonly FieldSignature StringNameFieldSig = new(ctx.Imported_StringNameType.ToTypeSignature(false));
+	readonly FieldSignature NodePathFieldSig = new(ctx.Imported_NodePathType.ToTypeSignature(false));
 
 	internal readonly Dictionary<string, FieldDefinition> StringNamesToCache = [];
 	internal readonly Dictionary<string, FieldDefinition> NodePathsToCache = [];
@@ -21,7 +21,6 @@ internal class CacheTypesEmitter(Context ctx)
 	{
 		if (StringNamesToCache.TryGetValue(value, out var fld))
 			return fld;
-		
 		var fieldName = ctx.Config.UseLongNames ? GetFieldName(value, StringNamesToCache.Values) : $"_{StringNamesToCache.Count}";
 		var field = new FieldDefinition(fieldName, FieldAttributes.Public | FieldAttributes.Static, StringNameFieldSig);
 		StringNamesToCache.Add(value, field);
@@ -45,6 +44,7 @@ internal class CacheTypesEmitter(Context ctx)
 	public void EmitTypes()
 	{
 		var objectType = ctx.Module.CorLibTypeFactory.Object.GetUnderlyingTypeDefOrRef();
+		var staticConstructorSig = new MethodSignature(CallingConventionAttributes.Default, ctx.Module.CorLibTypeFactory.Void, null);
 		TypeDefinition EmitType(string name, Dictionary<string, FieldDefinition> namesToCache, IMethodDescriptor ctorMethod)
 		{
 			var type = new TypeDefinition("", name, TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit)
@@ -63,7 +63,7 @@ internal class CacheTypesEmitter(Context ctx)
 					bar = new Foo();
 				}
 			*/
-			var cctor = new MethodDefinition(".cctor", MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.RuntimeSpecialName | MethodAttributes.SpecialName, new MethodSignature(CallingConventionAttributes.Default, ctx.Module.CorLibTypeFactory.Void.GetUnderlyingTypeDefOrRef().ToTypeSignature(ctx.Module.RuntimeContext), null))
+			var cctor = new MethodDefinition(".cctor", MethodAttributes.Private | MethodAttributes.Static | MethodAttributes.HideBySig | MethodAttributes.RuntimeSpecialName | MethodAttributes.SpecialName, staticConstructorSig)
 			{
 				CilMethodBody = new CilMethodBody()
 			};
