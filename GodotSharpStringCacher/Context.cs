@@ -128,18 +128,18 @@ public class Context
 	static bool IsStringToStringNameImplicitOp(IMethodDefOrRef method)
 	{
 		return method.Name == "op_Implicit" &&
-			method.DeclaringType?.FullName == "Godot.StringName" &&
-			method.Signature!.ReturnType.FullName == "Godot.StringName" &&
+			string.CompareOrdinal(method.DeclaringType?.FullName, "Godot.StringName") == 0 &&
+			string.CompareOrdinal(method.Signature!.ReturnType.FullName, "Godot.StringName") == 0 &&
 			method.Signature.GetTotalParameterCount() == 1 &&
-			method.Signature.ParameterTypes[0].FullName == "System.String";
+			string.CompareOrdinal(method.Signature.ParameterTypes[0].FullName, "System.String") == 0;
 	}
 
 	static bool IsStringToNodePathImplicitOp(IMethodDefOrRef method)
 	{
 		return method.Name == "op_Implicit" &&
-			method.DeclaringType?.FullName == "Godot.NodePath" &&
-			method.Signature!.ReturnType.FullName == "Godot.NodePath" &&
+			string.CompareOrdinal(method.DeclaringType?.FullName, "Godot.NodePath") == 0 &&
+			string.CompareOrdinal(method.Signature!.ReturnType.FullName, "Godot.NodePath") == 0 &&
 			method.Signature.GetTotalParameterCount() == 1 &&
-			method.Signature.ParameterTypes[0].FullName == "System.String";
+			string.CompareOrdinal(method.Signature.ParameterTypes[0].FullName, "System.String") == 0;
 	}
 }
