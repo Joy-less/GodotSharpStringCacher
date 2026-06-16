@@ -16,9 +16,9 @@ public class Context
 	internal readonly GodotSharpDefs Defs;
 
 	internal readonly ITypeDefOrRef Imported_StringNameType;
-	internal readonly IMethodDefOrRef Imported_StringName_StringCtor; 
+	internal readonly IMethodDescriptor Imported_StringName_StringCtor; 
 	internal readonly ITypeDefOrRef Imported_NodePathType;
-	internal readonly IMethodDefOrRef Imported_NodePath_StringCtor;
+	internal readonly IMethodDescriptor Imported_NodePath_StringCtor;
 
 	internal readonly CacheTypesEmitter CacheTypesEmitter;
 

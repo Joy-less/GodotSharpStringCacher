@@ -45,7 +45,7 @@ internal class CacheTypesEmitter(Context ctx)
 	public void EmitTypes()
 	{
 		var objectType = ctx.Module.CorLibTypeFactory.Object.GetUnderlyingTypeDefOrRef();
-		TypeDefinition EmitType(string name, Dictionary<string, FieldDefinition> namesToCache, IMethodDefOrRef ctorMethod)
+		TypeDefinition EmitType(string name, Dictionary<string, FieldDefinition> namesToCache, IMethodDescriptor ctorMethod)
 		{
 			var type = new TypeDefinition("", name, TypeAttributes.Class | TypeAttributes.NotPublic | TypeAttributes.Abstract | TypeAttributes.Sealed | TypeAttributes.BeforeFieldInit)
 			{

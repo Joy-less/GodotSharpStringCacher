@@ -1,4 +1,5 @@
 using AsmResolver.DotNet;
+using AsmResolver.DotNet.Signatures;
 
 namespace GodotSharpStringCacher;
 
@@ -7,27 +8,22 @@ internal class GodotSharpDefs
 	private GodotSharpDefs(ModuleDefinition godotSharpModule)
 	{
 		Module = godotSharpModule;
+		
+		var signature = MethodSignature.CreateInstance(Module.CorLibTypeFactory.Void, [Module.CorLibTypeFactory.String]);
 
-		StringNameType = Module.TopLevelTypes.First(x => x.FullName == "Godot.StringName");
-		StringName_StringCtor = StringNameType.Methods.First(x => 
-			x.IsConstructor &&
-			x.Parameters.Count == 1 &&
-			x.Parameters[0].ParameterType.FullName == "System.String"
-		);
-		NodePathType = Module.TopLevelTypes.First(x => x.FullName == "Godot.NodePath");
-		NodePath_StringCtor = NodePathType.Methods.First(x => 
-			x.IsConstructor &&
-			x.Parameters.Count == 1 &&
-			x.Parameters[0].ParameterType.FullName == "System.String"
-		);
+		StringNameType = Module.CreateTypeReference("Godot", "StringName");
+		StringName_StringCtor = StringNameType.CreateMethodReference(".ctor", signature);
+		
+		NodePathType = Module.CreateTypeReference("Godot", "NodePath");
+		NodePath_StringCtor = NodePathType.CreateMethodReference(".ctor", signature);
 	}
 
 	public readonly ModuleDefinition Module;
 
-	public readonly TypeDefinition StringNameType;
-	public readonly MethodDefinition StringName_StringCtor;
-	public readonly TypeDefinition NodePathType;
-	public readonly MethodDefinition NodePath_StringCtor;
+	public readonly TypeReference StringNameType;
+	public readonly IMethodDescriptor StringName_StringCtor;
+	public readonly TypeReference NodePathType;
+	public readonly IMethodDescriptor NodePath_StringCtor;
 
 	public static GodotSharpDefs FromReferencingModule(ModuleDefinition module, IAssemblyResolver assemblyResolver)
 	{
