@@ -29,7 +29,7 @@ public class GDStringCacheTask : Task
 	public ITaskItem[] CacheStrings { get; private set; }
 
 	[Required]
-	public bool UseShortNamesByDefault { get; set; }
+	public bool UseLongNamesByDefault { get; set; }
 
 	bool CacheOne(string path, string assemblyName, Config config)
 	{
@@ -64,7 +64,7 @@ public class GDStringCacheTask : Task
 
 	public override bool Execute()
 	{
-		var defaultConfig = new Config(UseShortNamesByDefault);
+		var defaultConfig = new Config(UseLongNamesByDefault);
 
 		if (CacheMainAssemblyStrings)
 		{
@@ -105,7 +105,7 @@ public class GDStringCacheTask : Task
 			return HasMetadata(taskWithOptions, name) ? GetBoolMetadata(taskWithOptions, name) : fallback;
 		}
 
-		return new(GetBool("ShortNames", defaultConfig.ShortNames));
+		return new(GetBool("LongNames", defaultConfig.UseLongNames));
 	}
 
 	static bool HasMetadata(ITaskItem taskItem, string name) => ((ICollection<string>)taskItem.MetadataNames).Contains(name);

@@ -8,19 +8,19 @@ static class Program
 
 	static void PrintUsage()
 	{
-		Console.WriteLine($"Usage: {Environment.GetCommandLineArgs()[0]} <in_file> <out_file> [--short-names]");
+		Console.WriteLine($"Usage: {Environment.GetCommandLineArgs()[0]} <in_file> <out_file> [--long-names]");
 	}
 
 	static Params? ParseParams(string[] args)
 	{
 		string? inFile = null;
 		string? outFile = null;
-		bool shortNames = false;
+		bool longNames = false;
 
 		foreach (var arg in args)
 		{
-			if (arg == "--short-names")
-				shortNames = true;
+			if (arg == "--long-names")
+				longNames = true;
 			else if (inFile == null)
 				inFile = arg;
 			else if (outFile == null)
@@ -37,7 +37,7 @@ static class Program
 			PrintUsage();
 			return null;
 		}
-		return new Params(inFile, outFile, new Config(shortNames));
+		return new Params(inFile, outFile, new Config(longNames));
 	}
 
 	public static void Main(string[] args)

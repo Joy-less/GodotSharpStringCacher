@@ -7,9 +7,9 @@
     <GDStringCacheAfterTargets Condition="'$(GDStringCacheAfterTargets)' == ''">Build</GDStringCacheAfterTargets>
 	<!-- The main assembly is cached by default. If, for some reason, you don't want to, you can -->
 	<GDStringCacheMainAssemblyStrings Condition="'$(GDStringCacheMainAssemblyStrings)' == ''">true</GDStringCacheMainAssemblyStrings>
-	<!-- Use short variable names instead of a variable name that looks like the literal string value -->
+	<!-- Use long variable names that look like the literal string value -->
 	<!-- This value can be overriden at the declaration level -->
-	<GDStringUseShortNames Condition="'$(GDStringUseShortNames)' == ''">false</GDStringUseShortNames>
+	<GDStringUseLongNames Condition="'$(GDStringUseLongNames)' == ''">false</GDStringUseLongNames>
   </PropertyGroup>
 
   <Target Name="CacheMainAssemblyStrings" AfterTargets="$(GDStringCacheAfterTargets)">
@@ -21,12 +21,12 @@
 		
 	    CacheMainAssemblyStrings="$(GDStringCacheMainAssemblyStrings)"
 		CacheStrings="@(CacheStrings)"
-		UseShortNamesByDefault="$(GDStringUseShortNames)" />
+		UseLongNamesByDefault="$(GDStringUseLongNames)" />
   </Target>
 
   <ItemDefinitionGroup>
     <CacheStrings>
-      <ShortNames>$(GDStringUseShortNames)</ShortNames>
+      <LongNames>$(GDStringUseLongNames)</LongNames>
 	</CacheStrings>
   </ItemDefinitionGroup>
 

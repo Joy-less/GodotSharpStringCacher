@@ -22,7 +22,7 @@ internal class CacheTypesEmitter(Context ctx)
 		if (StringNamesToCache.TryGetValue(value, out var fld))
 			return fld;
 		
-		var fieldName = GetFieldName(value, StringNamesToCache.Values);
+		var fieldName = ctx.Config.UseLongNames ? GetFieldName(value, StringNamesToCache.Values) : $"_{StringNamesToCache.Count}";
 		var field = new FieldDefinition(fieldName, FieldAttributes.Public | FieldAttributes.Static, StringNameFieldSig);
 		StringNamesToCache.Add(value, field);
 		return field;
@@ -33,7 +33,7 @@ internal class CacheTypesEmitter(Context ctx)
 		if (NodePathsToCache.TryGetValue(value, out var fld))
 			return fld;
 		
-		var fieldName = GetFieldName(value, NodePathsToCache.Values);
+		var fieldName = ctx.Config.UseLongNames ? GetFieldName(value, NodePathsToCache.Values) : $"_{NodePathsToCache.Count}";
 		var field = new FieldDefinition(fieldName, FieldAttributes.Public | FieldAttributes.Static, NodePathFieldSig);
 		NodePathsToCache.Add(value, field);
 		return field;
@@ -95,15 +95,11 @@ internal class CacheTypesEmitter(Context ctx)
 	
 	/// <summary>
 	/// Turns a string value to a CIL field name with a closely resembling name.
-	/// This can help static analysis.
-	/// If <c>ctx.Config.ShortNames</c> is set, return a short name with no meaning.
+	/// This can help static analysis, but makes patching slower
 	/// </summary>
 	/// <param name="existingFields">Existing field names to check for duplicates</param>
 	string GetFieldName(string value, ICollection<FieldDefinition> existingFields)
 	{
-		if (ctx.Config.ShortNames)
-			return $"_{existingFields.Count}";
-
 		// TODO: surely it can't be that simple, even if CIL accepts unicode
 		string sanitized = value.Replace(' ', '_');
 
