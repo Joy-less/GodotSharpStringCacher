@@ -73,7 +73,24 @@ public class Context
 			NestedTypeWalk(moduleType);
 		}
 		CacheTypesEmitter.EmitTypes();
-		Module.Write(outputFile);
+		// Test if the input and output files are the same
+		if (string.Equals(Path.GetFullPath(inputFile), Path.GetFullPath(outputFile), Environment.OSVersion.Platform == PlatformID.Win32NT ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
+		{
+			// Mono.Cecil will not behave correctly if you write to a module to itself
+			// So we write it to memory first, then overwrite the file.
+			string temp = Path.GetTempFileName();
+			Module.Write(temp);
+			// Note: netstandard2.0 does not yet support the overwrite parameter in File.Move
+			// we delete it manually
+			File.Delete(inputFile);
+			File.Move(temp, outputFile);
+			Module.Dispose();
+		}
+		else
+		{
+			Module.Write(outputFile);
+			Module.Dispose();
+		}
 		NumberOfStringNamesWritten = CacheTypesEmitter.StringNamesToCache.Count;
 		NumberOfNodePathsWritten = CacheTypesEmitter.NodePathsToCache.Count;
 	}
