@@ -1,4 +1,4 @@
-﻿using AsmResolver.DotNet;
+using AsmResolver.DotNet;
 using AsmResolver.PE.DotNet.Cil;
 
 namespace GodotSharpStringCacher;
