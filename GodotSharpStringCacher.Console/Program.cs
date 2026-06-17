@@ -1,4 +1,4 @@
-﻿namespace GodotSharpStringCacher.Console;
+namespace GodotSharpStringCacher.Console;
 
 using Console = System.Console;
 
