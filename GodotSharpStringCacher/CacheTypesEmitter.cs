@@ -11,11 +11,22 @@ internal class CacheTypesEmitter(Context ctx)
 	public const string STRING_NAME_CACHE_TYPE_NAME = "?_StringNameCache";
 	public const string NODE_PATH_CACHE_TYPE_NAME = "?_NodePathCache";
 
-	readonly FieldSignature StringNameFieldSig = new(ctx.Imported_StringNameType.ToTypeSignature(false));
-	readonly FieldSignature NodePathFieldSig = new(ctx.Imported_NodePathType.ToTypeSignature(false));
+	FieldSignature StringNameFieldSig = null!;
+	FieldSignature NodePathFieldSig = null!;
 
 	internal readonly Dictionary<string, FieldDefinition> StringNamesToCache = [];
 	internal readonly Dictionary<string, FieldDefinition> NodePathsToCache = [];
+
+	public void Reset(bool regenerateSignatures)
+	{
+		if (regenerateSignatures)
+		{
+			StringNameFieldSig = new(ctx.Imported_StringNameType.ToTypeSignature(false));
+			NodePathFieldSig = new(ctx.Imported_NodePathType.ToTypeSignature(false));
+		}
+		StringNamesToCache.Clear();
+		NodePathsToCache.Clear();
+	}
 
 	public FieldDefinition AddStringName(string value)
 	{

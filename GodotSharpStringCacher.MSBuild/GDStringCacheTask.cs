@@ -31,14 +31,12 @@ public class GDStringCacheTask : Task
 	[Required]
 	public bool UseLongNamesByDefault { get; set; }
 
-	bool CacheOne(string path, string assemblyName, Config config)
+	bool CacheOne(Context ctx, string path, string assemblyName)
 	{
 		Log.LogMessage($"{assemblyName}: Caching Godot strings...");
 		try
 		{
-			var ctx = new Context(path, config);
-			ctx.Run();
-			ctx.Write(path);
+			ctx.RunAndSave(path, path);
 			Log.LogMessage($"{assemblyName}: StringNames cached: {ctx.NumberOfStringNamesWritten}");
 			Log.LogMessage($"{assemblyName}: NodePaths cached: {ctx.NumberOfNodePathsWritten}");
 		}
@@ -65,10 +63,11 @@ public class GDStringCacheTask : Task
 	public override bool Execute()
 	{
 		var defaultConfig = new Config(UseLongNamesByDefault);
+		var ctx = new Context(defaultConfig);
 
 		if (CacheMainAssemblyStrings)
 		{
-			if (!CacheOne($"{OutputPath}{AssemblyName}.dll", AssemblyName, defaultConfig))
+			if (!CacheOne(ctx, $"{OutputPath}{AssemblyName}.dll", AssemblyName))
 				return false;
 		}
 
@@ -89,7 +88,8 @@ public class GDStringCacheTask : Task
 			else continue;
 			var fullPath = reference.GetMetadata("FullPath");
 
-			if (!CacheOne(fullPath, fileName, ParseConfig(assemblyTask, defaultConfig)))
+			ctx.Config = ParseConfig(assemblyTask, defaultConfig);
+			if (!CacheOne(ctx, fullPath, fileName))
 			{
 				return false;
 			}

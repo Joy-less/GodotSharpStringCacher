@@ -47,9 +47,8 @@ static class Program
 			var parameters = ParseParams(args);
 			if (parameters == null)
 				return;
-			var x = new Context(parameters.InFile, parameters.Config);
-			x.Run();
-			x.Write(parameters.OutFile);
+			var ctx = new Context(parameters.Config);
+			ctx.RunAndSave(parameters.InFile, parameters.OutFile);
 		}
 		catch (NoGodotSharpReferenceExeption ex)
 		{

@@ -5,59 +5,71 @@ namespace GodotSharpStringCacher;
 
 public class Context
 {
-	public readonly ModuleDefinition Module;
+	internal ModuleDefinition Module { get; private set; } = null!;
 
-	public readonly string FileName;
+	internal RuntimeContext RuntimeContext { get; private set; } = null!;
 
-	public readonly Config Config;
+	internal string FileName { get; private set; } = null!;
 
-	public bool HasRun { get; private set; }
+	internal string? LastRunDirectory { get; private set; } = null;
 
-	internal readonly GodotSharpDefs Defs;
+	public Config Config { get; set; }
 
-	internal readonly ITypeDefOrRef Imported_StringNameType;
-	internal readonly IMethodDescriptor Imported_StringName_StringCtor; 
-	internal readonly ITypeDefOrRef Imported_NodePathType;
-	internal readonly IMethodDescriptor Imported_NodePath_StringCtor;
+	internal GodotSharpDefs Defs { get; private set; } = null!;
+
+	internal ITypeDefOrRef Imported_StringNameType { get; private set; } = null!;
+	internal IMethodDescriptor Imported_StringName_StringCtor { get; private set; } = null!; 
+	internal ITypeDefOrRef Imported_NodePathType { get; private set; } = null!;
+	internal IMethodDescriptor Imported_NodePath_StringCtor { get; private set; } = null!;
 
 	internal readonly CacheTypesEmitter CacheTypesEmitter;
 
-	public Context(string fileName, Config? config = null)
+	public Context(Config? config = null)
 	{
 		Config = config ?? Config.Default;
-		FileName = fileName;
-		Module = ModuleDefinition.FromFile(FileName);
 
-		var directory = Path.GetDirectoryName(FileName) ?? throw new ArgumentException("Could not resolve directory name from module path");
-		var resolver = PathAssemblyResolver.FromSearchDirectories([directory]);
-
-		Defs = GodotSharpDefs.FromReferencingModule(Module, resolver);
-		Imported_StringNameType = Module.DefaultImporter.ImportType(Defs.StringNameType);
-		Imported_StringName_StringCtor = Module.DefaultImporter.ImportMethod(Defs.StringName_StringCtor);
-		Imported_NodePathType = Module.DefaultImporter.ImportType(Defs.NodePathType);
-		Imported_NodePath_StringCtor = Module.DefaultImporter.ImportMethod(Defs.NodePath_StringCtor);
 		CacheTypesEmitter = new(this);
 	}
 
-	public int NumberOfStringNamesWritten => CacheTypesEmitter.StringNamesToCache.Count;
-	public int NumberOfNodePathsWritten => CacheTypesEmitter.NodePathsToCache.Count;
+	public int NumberOfStringNamesWritten { get; set; }
+	public int NumberOfNodePathsWritten { get; set; }
 
-	public void Write(string fileName)
+	public void RunAndSave(string inputFile, string outputFile)
 	{
-		if (HasRun)
-			Module.Write(fileName);
-	}
+		FileName = inputFile;
 
-	public void Run()
-	{
-		if (HasRun)
-			return;
+		var directory = Path.GetDirectoryName(FileName) ?? throw new ArgumentException("Could not resolve directory name from module path");
+		if (LastRunDirectory == null || LastRunDirectory != directory)
+		{
+			Module = ModuleDefinition.FromFile(FileName, createRuntimeContext: true);
+			RuntimeContext = Module.RuntimeContext!;
+
+			// since we are in a different directory, the GodotSharp assembly may not be the same, so we reload everything.
+			var resolver = PathAssemblyResolver.FromSearchDirectories([directory]);
+
+			Defs = GodotSharpDefs.FromReferencingModule(Module, resolver);
+			Imported_StringNameType = Module.DefaultImporter.ImportType(Defs.StringNameType);
+			Imported_StringName_StringCtor = Module.DefaultImporter.ImportMethod(Defs.StringName_StringCtor);
+			Imported_NodePathType = Module.DefaultImporter.ImportType(Defs.NodePathType);
+			Imported_NodePath_StringCtor = Module.DefaultImporter.ImportMethod(Defs.NodePath_StringCtor);
+			
+			CacheTypesEmitter.Reset(true);
+			LastRunDirectory = directory;
+		}
+		else
+		{
+			Module = RuntimeContext.LoadAssembly(inputFile).ManifestModule ?? throw new NullReferenceException("ManifestModule is null");
+			CacheTypesEmitter.Reset(false);
+		}
+
 		foreach (var moduleType in Module.GetAllTypes())
 		{
 			PatchType(moduleType);
 		}
 		CacheTypesEmitter.EmitTypes();
-		HasRun = true;
+		Module.Write(outputFile);
+		NumberOfStringNamesWritten = CacheTypesEmitter.StringNamesToCache.Count;
+		NumberOfNodePathsWritten = CacheTypesEmitter.NodePathsToCache.Count;
 	}
 
 	void PatchType(TypeDefinition type)
