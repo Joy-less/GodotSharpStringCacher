@@ -39,7 +39,7 @@ public class Context
 		FileName = inputFile;
 
 		string directory = Path.GetDirectoryName(FileName) ?? throw new ArgumentException("Could not resolve directory name from module path");
-        DefaultAssemblyResolver resolver = new();
+        using DefaultAssemblyResolver resolver = new();
         resolver.AddSearchDirectory(directory);
 
         using (Module = ModuleDefinition.ReadModule(FileName, new ReaderParameters() { AssemblyResolver = resolver }))
