@@ -1,37 +1,73 @@
 <Project>
-  <!-- <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)bin/Debug/netstandard2.0/$(MSBuildThisFileName).dll" TaskName="GodotSharpStringCacher.MSBuild.GDStringCacheTask" /> -->
-  <UsingTask AssemblyFile="$(MSBuildThisFileDirectory)../tasks/netstandard2.0/$(MSBuildThisFileName).dll" TaskName="GodotSharpStringCacher.MSBuild.GDStringCacheTask" />
-
   <PropertyGroup>
-    <!-- The Target this task is run after can be customized (eg if you use an obfuscator) -->
-    <GDStringCacheAfterTargets Condition="'$(GDStringCacheAfterTargets)' == ''">Build</GDStringCacheAfterTargets>
-	<!-- The main assembly is cached by default. If, for some reason, you don't want to, you can -->
-	<GDStringCacheMainAssemblyStrings Condition="'$(GDStringCacheMainAssemblyStrings)' == ''">true</GDStringCacheMainAssemblyStrings>
-	<!-- Warn user if implicit string operator is used on non-constant -->
-	<GDStringWarnOnNonConstantImplicitOperator Condition="'$(GDStringWarnOnNonConstantImplicitOperator)' == ''">true</GDStringWarnOnNonConstantImplicitOperator>
-	<!-- Use long variable names that look like the literal string value -->
-	<!-- This value can be overriden at the declaration level -->
-	<GDStringUseLongNames Condition="'$(GDStringUseLongNames)' == ''">false</GDStringUseLongNames>
+    <GDStringAssembly>$(MSBuildThisFileDirectory)../tasks/netstandard2.0/$(MSBuildThisFileName).dll</GDStringAssembly>
+    <!-- <GDStringAssembly>$(MSBuildThisFileDirectory)bin/Debug/netstandard2.0/$(MSBuildThisFileName).dll</GDStringAssembly> -->
   </PropertyGroup>
 
-  <Target Name="CacheMainAssemblyStrings" AfterTargets="$(GDStringCacheAfterTargets)">
-    <GDStringCacheTask
-		OutputPath="$(OutputPath)"
-		AssemblyName="$(AssemblyName)"
-		ReferencePath="@(ReferencePath)"
-		PackageReference="@(PackageReference)"
-		
-	    CacheMainAssemblyStrings="$(GDStringCacheMainAssemblyStrings)"
-		CacheStrings="@(CacheStrings)"
-		WarnOnNonConstantImplicitOperator="$(GDStringWarnOnNonConstantImplicitOperator)"
-		UseLongNamesByDefault="$(GDStringUseLongNames)" />
+  <UsingTask AssemblyFile="$(GDStringAssembly)" TaskName="GodotSharpStringCacher.MSBuild.GDStringMainAssemblyCacheTask" />
+  <UsingTask AssemblyFile="$(GDStringAssembly)" TaskName="GodotSharpStringCacher.MSBuild.GDStringDependencyCacheTask" />
+
+  <PropertyGroup>
+    <!-- The main assembly is cached by default. If, for some reason, you don't want to, you can -->
+    <GDStringCacheMainAssemblyStrings Condition="'$(GDStringCacheMainAssemblyStrings)' == ''">true</GDStringCacheMainAssemblyStrings>
+    <!-- Warn user if implicit string operator is used on non-constant -->
+    <GDStringWarnOnNonConstantImplicitOperator Condition="'$(GDStringWarnOnNonConstantImplicitOperator)' == ''">true</GDStringWarnOnNonConstantImplicitOperator>
+    <!-- Use long variable names that look like the literal string value -->
+    <!-- This value can be overriden at the declaration level -->
+    <GDStringUseLongNames Condition="'$(GDStringUseLongNames)' == ''">false</GDStringUseLongNames>
+  </PropertyGroup>
+
+  <Target Name="CacheDependenciesStrings" AfterTargets="ResolveAssemblyReferences" >
+    <GDStringDependencyCacheTask
+      IntermediateOutputPath="$(IntermediateOutputPath)" 
+      ReferencePath="@(ReferencePath)"
+      ReferenceCopyLocalPaths="@(ReferenceCopyLocalPaths)"
+      PackageReference="@(PackageReference)"
+
+      CacheStrings="@(CacheStrings)"
+      WarnOnNonConstantImplicitOperator="$(GDStringWarnOnNonConstantImplicitOperator)"
+      UseLongNamesByDefault="$(GDStringUseLongNames)"
+    >
+      <Output TaskParameter="RemovedReferencePath" ItemName="_RemovedReferencePath" />
+      <Output TaskParameter="AddedReferencePath" ItemName="_AddedReferencePath" />
+      <Output TaskParameter="RemovedReferenceCopyLocalPaths" ItemName="_RemovedReferenceCopyLocalPaths" />
+      <Output TaskParameter="AddedReferenceCopyLocalPaths" ItemName="_AddedReferenceCopyLocalPaths" />
+    </GDStringDependencyCacheTask>
+
+    <ItemGroup>
+      <!-- Replace the assembly paths with our cached assemblies' paths -->
+      <ReferencePath Remove="@(_RemovedReferencePath)" />
+      <ReferencePath Include="@(_AddedReferencePath)" />
+      <ReferenceCopyLocalPaths Remove="@(_RemovedReferenceCopyLocalPaths)" />
+      <ReferenceCopyLocalPaths Include="@(_AddedReferenceCopyLocalPaths)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="CacheMainAssemblyStrings" BeforeTargets="CopyFilesToOutputDirectory" Condition="'$(GDStringCacheMainAssemblyStrings)' == 'true'">
+    <GDStringMainAssemblyCacheTask
+      AssemblyName="$(AssemblyName)"
+      IntermediateAssembly="@(IntermediateAssembly)"
+      ReferencePath="@(ReferencePath)"
+      IntermediateOutputPath="$(IntermediateOutputPath)"
+      
+      WarnOnNonConstantImplicitOperator="$(GDStringWarnOnNonConstantImplicitOperator)"
+      UseLongNamesByDefault="$(GDStringUseLongNames)"
+    >
+      <Output TaskParameter="CachedIntermediateAssembly" ItemName="_CachedIntermediateAssembly" />
+
+    </GDStringMainAssemblyCacheTask>
+
+    <ItemGroup>
+      <IntermediateAssembly Remove="@(IntermediateAssembly)" />
+      <IntermediateAssembly Include="@(_CachedIntermediateAssembly)" />
+    </ItemGroup>
   </Target>
 
   <ItemDefinitionGroup>
     <CacheStrings>
       <LongNames>$(GDStringUseLongNames)</LongNames>
-	  <WarnOnNonConstantImplicitOperator>$(GDStringWarnOnNonConstantImplicitOperator)</WarnOnNonConstantImplicitOperator>
-	</CacheStrings>
+      <WarnOnNonConstantImplicitOperator>$(GDStringWarnOnNonConstantImplicitOperator)</WarnOnNonConstantImplicitOperator>
+    </CacheStrings>
   </ItemDefinitionGroup>
 
 </Project>
