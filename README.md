@@ -74,7 +74,8 @@ It looks for calls to these implicit conversion operators, then if the string is
 
 # Bugs and contributing
 
-I only tested this project on my own Godot projects, and it is still new. Therefore, there may be bugs. If you find a bug please please **PLEASE** fill an issue. Thanks :>
-
+The current release should be stable. If you find a bug please please **PLEASE** fill an issue.
 
 Feel free to contribute too !
+
+If you find this project useful, drop a :star: too ! Thank you :>
