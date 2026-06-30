@@ -119,6 +119,13 @@ internal static class Common
 
 	public static void CacheLoggerWarnings(string warningsFile, IReadOnlyCollection<Logger.SerializedWarningLog> logWarnings)
 	{
+		if (logWarnings.Count == 0)
+		{
+			// Removes the file if it was there previously
+			// Otherwise older warnings will appear
+			File.Delete(warningsFile);
+			return;
+		}
 		using FileStream fs = File.Create(warningsFile);
 		JsonHelper.Serialize(logWarnings.ToArray(), fs);
 	}
