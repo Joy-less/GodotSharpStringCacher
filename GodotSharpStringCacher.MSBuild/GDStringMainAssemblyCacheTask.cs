@@ -70,7 +70,7 @@ public class GDStringMainAssemblyCacheTask : Task
 		}
 
 		File.WriteAllText(hashFile, newHash);
-		SerializedWarningLog.SerializeToFile(log.Warnings, warningsFile);
+		Common.Logger.SerializedWarningLog.SerializeToFile(log.Warnings, warningsFile);
 
 		return true;
 	}

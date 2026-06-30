@@ -4,10 +4,9 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -124,7 +123,7 @@ internal static class Common
 	{
 		try
 		{
-			foreach (SerializedWarningLog warningLog in SerializedWarningLog.DeserializeFromFile(warningsFile))
+			foreach (Logger.SerializedWarningLog warningLog in Logger.SerializedWarningLog.DeserializeFromFile(warningsFile))
 			{
 				if (warningLog.File != null)
 				{
@@ -181,22 +180,26 @@ internal static class Common
 		{
 			task.Log.LogError(null, null, null, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message);
 		}
+
+		[DataContract]
+		public readonly record struct SerializedWarningLog(
+			[property: DataMember] string Message,
+			[property: DataMember] string File,
+			[property: DataMember] int Line,
+			[property: DataMember] int Column,
+			[property: DataMember] int EndLine,
+			[property: DataMember] int EndColumn)
+		{
+			public static void SerializeToFile(IReadOnlyCollection<SerializedWarningLog> warningLogs, string warningsFile)
+			{
+				using FileStream fs = System.IO.File.Create(warningsFile);
+				JsonHelper.Serialize(warningLogs.ToArray(), fs);
+			}
+			public static IReadOnlyCollection<SerializedWarningLog> DeserializeFromFile(string warningsFile)
+			{
+				using FileStream fs = System.IO.File.OpenRead(warningsFile);
+				return JsonHelper.Deserialize<SerializedWarningLog[]>(fs);
+			}
+		}
 	}
 }
-
-readonly record struct SerializedWarningLog(string Message, string File, int Line, int Column, int EndLine, int EndColumn)
-{
-	public static void SerializeToFile(IReadOnlyCollection<SerializedWarningLog> warningLogs, string warningsFile)
-	{
-		using FileStream fs = System.IO.File.Create(warningsFile);
-		JsonSerializer.Serialize(fs, warningLogs, SerializedWarningLogContext.Default.IReadOnlyCollectionSerializedWarningLog);
-	}
-	public static IReadOnlyCollection<SerializedWarningLog> DeserializeFromFile(string warningsFile)
-	{
-		using FileStream fs = System.IO.File.OpenRead(warningsFile);
-		return JsonSerializer.Deserialize(fs, SerializedWarningLogContext.Default.IReadOnlyCollectionSerializedWarningLog);
-	}
-}
-
-[JsonSerializable(typeof(IReadOnlyCollection<SerializedWarningLog>))]
-sealed partial class SerializedWarningLogContext : JsonSerializerContext { }
